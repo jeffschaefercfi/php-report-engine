@@ -112,7 +112,7 @@ class Report{
 		$listener_id = Report::listener_id($report,$specific_id);
 		$listener_updated = Report::get_listener_last_updated_time($listener_id);
 
-		//Progress Bar
+		//Progress Bar - https://kimmobrunfeldt.github.io/progressbar.js/
 		$progressbar_plugin_file = ReportConfig::WEBROOT.'plugins/progressbar.js';
 		$controls .= '<script type="text/javascript" src="'.$progressbar_plugin_file.'"></script>';
 		$controls .= <<<HTML

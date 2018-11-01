@@ -3,7 +3,7 @@ use ReportEngine\ReportConfig;
 
 //bar_simple_eventperday_last30
 
-function data_sample_d3_bar($listener_id,$account_id){
+function data_sample_table_report($listener_id,$account_id){
 
    
 	$dateindex = array();
@@ -14,6 +14,7 @@ function data_sample_d3_bar($listener_id,$account_id){
 	$data = array();
 	$total_data_points = 100;//$total_data_points = count($rowsfromdatabase);
 	for($i=0;$i<$total_data_points;++$i){
+	    if(rand(0,4)==4){sleep(1);}//to show progress bar working - remove this line in a production system
 		$data[] = rand(0,5);
 		$progress = $i/$total_data_points;//progress should be between 1 and 0
 		//Notice that we use $progress*.9 below. This is because we want this part of the data grab to run from 0 to 90%
@@ -21,8 +22,7 @@ function data_sample_d3_bar($listener_id,$account_id){
 //		sleep(1);
 	}
 
-	$csvfile = fopen(dirname(dirname(__FILE__)) .ReportEngine\ReportConfig::REPORT_DATA.'sample_d3_bar.csv','w');
-	fputcsv($csvfile,array('key','value'));
+	$csvfile = fopen(dirname(dirname(__FILE__)) .ReportEngine\ReportConfig::REPORT_DATA.'sample_table_report.csv','w');
 
 	$n = 0;
 	$datacount = count($data);
@@ -37,19 +37,46 @@ function data_sample_d3_bar($listener_id,$account_id){
 	ReportEngine\Report::set_listener_content($listener_id,1,ReportEngine\Report::STATUS_COMPLETE);
 }
 
-function display_sample_d3_bar(){
+function display_sample_table_report(){
 
-	$id = 'sample_d3_bar';
+	$id = 'sample_table_report';
 
-	$files = get_data_files_sample_d3_bar();
-	$csvfile = $files['main'];
-	$data_url = ReportEngine\ReportConfig::WEBROOT.'reportdata/sample_d3_bar.csv';
+	$data_path = dirname(dirname(__FILE__)).'/reportdata/sample_table_report.csv';
 
+	if(file_exists($data_path)){
+	    $datafile = fopen($data_path,'r');
+	}else{
+	    return 'Data not built yet: '.$data_path;
+	}
+
+	$numberindex = array();
+	$data = fgetcsv($datafile);
+	do{
+	    $numberindex[$data[1]]++;
+	    $data = fgetcsv($datafile);
+	}while($data != null);
+	
 	$report = '';
 	
-	$report .= '<script src="https://d3js.org/d3.v5.js"></script>';//include d3.js
+	$report .= '<h1>Display rank of numbers 0-5. How often were they chosen in rand(0,5)?</h1>';
 	$report .= <<<HTML
-<div id="$id"></div>
+<div id="$id">
+
+<table>
+
+<tr><th>Number</th><th>Times Chosen</th></tr>
+
+HTML;
+
+	foreach($numberindex as $num=>$count){
+	    $report .= '<tr><td>'.$num.'</td><td>'.$count.'</td></tr>';
+	}
+	
+	$report .= <<<HTML
+
+</table>
+
+</div>
 	<style>
 
 	.axis {
@@ -66,43 +93,16 @@ function display_sample_d3_bar(){
 	</style>
 HTML;
 
-	$report .= <<<HTML
 
-<script>
-
-var margin = {top: 20, right: 20, bottom: 70, left: 40},
-    width = 600 - margin.left - margin.right,
-    height = 300 - margin.top - margin.bottom;
-
-var svg = d3.select("#$id").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", 
-          "translate(" + margin.left + "," + margin.top + ")");
-
-
-
-d3.csv("$data_url", function(data) {
-
-  svg.selectAll("bar")
-      .data(data)
-    .enter().append("rect")
-      .style("fill", "steelblue")
-
-});
-
-</script>
-HTML;
 
 
 	return $report;
 }
 
-function default_refresh_sample_d3_bar(){
+function default_refresh_sample_table_report(){
 	return 86400;
 }
 
-function get_data_files_sample_d3_bar(){
-	return array('main'=>dirname(dirname(__FILE__)).ReportEngine\ReportConfig::REPORT_DATA.'/sample_d3_bar.csv');
+function get_data_files_sample_table_report(){
+	return array('main'=>dirname(dirname(__FILE__)).ReportEngine\ReportConfig::REPORT_DATA.'/sample_table_report.csv');
 }

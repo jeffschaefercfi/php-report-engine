@@ -1,1 +1,0 @@
-{"time":1540894798,"progress":0,"status":2,"message":"sample_d3_bar"}
